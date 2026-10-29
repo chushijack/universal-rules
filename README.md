@@ -65,14 +65,35 @@ https://github.com/chushijack/universal-rules/releases/latest/download/shadowroc
 
 ## v2rayN
 
-### 1. 更新 Geo（两个地址）
+### 1. 更新 Geo（geosite.dat + geoip.dat）
 
-在 **Geo 文件 / 更新 Geo** 里把 geosite、geoip 下载地址改成下面两个，然后更新。要用 **本仓库 Release 的 dat**，规则里的 `geosite:cn`、`geosite:google` 等分类名才和名单对得上。
+**不要**填在「添加规则 → 可选地址」里（那里只用于 `v2rayN.json`）。也**不要**填「路由规则集来源」——那是 sing-box 的 `.srs`，和 Geo 无关。
+
+任选一种方式：
+
+**方式 A（推荐，一条模板对应两个文件）**
+
+1. **设置 → 参数设置 → v2rayN 设置**
+2. **Geo 文件来源（可选）**：若下拉可选手动/自定义，填（注意中间的 `{0}`，程序更新时会分别换成 `geosite` 和 `geoip`）：
+
+```text
+https://github.com/chushijack/universal-rules/releases/latest/download/{0}.dat
+```
+
+3. 回到主界面 **检查更新 → 更新 Geo 文件**（或右键菜单里的同类项）。
+
+等价于下面两个地址，不必分开填两次：
 
 ```text
 https://github.com/chushijack/universal-rules/releases/latest/download/geosite.dat
 https://github.com/chushijack/universal-rules/releases/latest/download/geoip.dat
 ```
+
+**方式 B（界面里没有自定义 Geo 来源时）**
+
+浏览器分别下载上面两个文件，覆盖到 v2rayN 的 **bin** 目录（**设置 → 打开存储所在的位置**，再进 `bin`，替换同名 `geosite.dat`、`geoip.dat`）。
+
+必须用 **本仓库 Release** 的 dat，规则里的 `geosite:cn`、`geosite:google` 等分类名才和名单一致；不要用 Loyalsoldier 默认 Geo，否则和 `v2rayN.json` 对不上。更新后 `geosite.dat` 体积应在 **数 MB** 量级；若只有几 KB，多半是下载失败（HTML 错误页），需重新更新。
 
 ### 2. 导入路由（一个 Url）
 
