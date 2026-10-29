@@ -139,7 +139,7 @@ https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-bu
 
 ### DNS 与防泄露（建议）
 
-路由 JSON（`v2rayN.json` / `v2rayN-builtin-geo.json`）**已自带** 两条规则：「🌐 绕过中国公共 DNS IP / 域名」，保证连 Ali、DoH.pub 等 **走直连**，与下面 DNS 设置配套。
+路由 JSON（`v2rayN.json` / `v2rayN-builtin-geo.json`）**已自带** 前置规则：「🌐 绕过中国公共 DNS IP / 域名」（连 Ali、DoH.pub **走直连**）、「🚫 阻断 UDP 443」（减少 QUIC 绕过域名分流）。顺序在局域网/国内/漏网之鱼 **之前**，避免 DoH 被漏网送进代理。再按下面配 DNS。
 
 **1. 简易 DNS**
 
