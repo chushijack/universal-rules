@@ -65,9 +65,10 @@ https://github.com/chushijack/universal-rules/releases/latest/download/shadowroc
 
 ## v2rayN
 
-两种用法二选一：**方案 A** 与 FlClash 同一套名单（要换 Geo）；**方案 B** 只用 v2rayN 自带 dat，只导入一条分流 JSON。
+两种用法二选一：**方案 A** 使用本仓库 Geo 与 `v2rayN.json`；**方案 B** 使用 v2rayN 自带 dat 与 `v2rayN-builtin-geo.json`。  
+两种方案都建议配置 **DNS 与 Tun**（见「DNS 与防泄露」），路由与 DNS 一起生效，降低 DNS 泄露风险。
 
-### 方案 A：与 FlClash 一致（自定义 Geo + `v2rayN.json`）
+### 方案 A：本仓库 Geo + `v2rayN.json`
 
 #### 1. 更新 Geo（geosite.dat + geoip.dat）
 
@@ -110,7 +111,7 @@ https://github.com/chushijack/universal-rules/releases/latest/download/geoip.dat
 https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN.json
 ```
 
-导入后与 FlClash 脚本是同一套分类和顺序（名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用）：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🎬 媒体、🔍 Google、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（规则备注为「🐟 漏网之鱼」）。路由编辑里把 **域名解析策略** 设为 **AsIs**。
+导入后分类与顺序同本文「黑名单和白名单」：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🎬 媒体、🔍 Google、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（「🐟 漏网之鱼」）。名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用。路由编辑里把 **域名解析策略** 设为 **AsIs**。
 
 ### 方案 B：内置 Geo，只导入分流 JSON（省事）
 
@@ -122,7 +123,7 @@ https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN.js
 https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-builtin-geo.json
 ```
 
-路由顺序与 FlClash **分组意图** 对齐，但名单来自社区 Geo，**不会**与 `flclash.js` 逐条一致，例如：
+路由顺序同上；名单来自 Loyalsoldier 等社区 Geo 分类，**没有**本仓库 `geosite:reject`、`geosite:proxy` 等大名单，与方案 A 在细节上会有差别，例如：
 
 | 分组 | 内置 Geo 引用 |
 | --- | --- |
@@ -134,7 +135,40 @@ https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-bu
 | Google | `geosite:google` |
 | 漏网之鱼 | 未命中 → `proxy`（无 `geosite:proxy` 大名单） |
 
-域名解析策略同样建议 **AsIs**。若要与 FlClash、Play 相关域名处理完全一致，用 **方案 A**。
+域名解析策略同样建议 **AsIs**。需要与本仓库 Geo 完全同一套名单时，用 **方案 A**。
+
+### DNS 与防泄露（建议）
+
+路由 JSON（`v2rayN.json` / `v2rayN-builtin-geo.json`）**已自带** 两条规则：「🌐 绕过中国公共 DNS IP / 域名」，保证连 Ali、DoH.pub 等 **走直连**，与下面 DNS 设置配套。
+
+**1. 简易 DNS**
+
+Release 提供 **`simple_dns.json`**（v2rayN `SimpleDNSItem` 格式）。在 **设置 → Core 基础设置 → DNS → DNS 基础设置** 中按文件填写，或下载后对照：
+
+```text
+https://github.com/chushijack/universal-rules/releases/latest/download/simple_dns.json
+```
+
+| 项 | 建议值 |
+| --- | --- |
+| 直连 DNS | `https://dns.alidns.com/dns-query,https://doh.pub/dns-query` |
+| 远程 DNS | `https://1.1.1.1/dns-query,https://8.8.8.8/dns-query` |
+| Bootstrap DNS | `223.5.5.5,119.29.29.29` |
+| 直连目标解析策略 | **UseIPv4**（用直连 DNS，不用系统 DNS） |
+| 代理目标解析策略 | **UseIPv4**（用远程 DNS，经代理访问） |
+| 并行查询 | **关** |
+| 使用系统 hosts | **关** |
+| 添加常用 DNS Hosts | **开** |
+
+**国内/局域网域名** 走国内 DoH 解析；**其余** 走 1.1.1.1 / 8.8.8.8，且经 **当前节点** 访问解析服务，避免国外测速域名先落到运营商 DNS。
+
+**2. Tun**
+
+仅 **系统代理** 拦不住 DNS。请 **设置 → Tun 模式设置** 打开 **启用 Tun**，并开启 **严格路由（Strict Route）**，减少 Windows 把 53 端口直接发给运营商的情况。改完后 **重启 Core**。
+
+**3. 自测**
+
+用 [browserleaks.com/dns](https://browserleaks.com/dns) 看是否出现 **本地 ISP 解析器**；分流下 [ip.skk.moe](https://ip.skk.moe) 出现多个解析器不一定等于泄露，以 browserleaks 为准。
 
 ## 不要单独导入的文件
 
