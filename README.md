@@ -65,26 +65,24 @@ https://github.com/chushijack/universal-rules/releases/latest/download/shadowroc
 
 ## v2rayN
 
-把 Geo 文件地址改成下面两个，然后更新 Geo 文件：
+### 1. 更新 Geo（两个地址）
+
+在 **Geo 文件 / 更新 Geo** 里把 geosite、geoip 下载地址改成下面两个，然后更新。要用 **本仓库 Release 的 dat**，规则里的 `geosite:cn`、`geosite:google` 等分类名才和名单对得上。
 
 ```text
 https://github.com/chushijack/universal-rules/releases/latest/download/geosite.dat
 https://github.com/chushijack/universal-rules/releases/latest/download/geoip.dat
 ```
 
-路由用这一份，里面没有节点。`proxy` 表示当前选中的服务器，`direct` 直连，`block` 拦截。
+### 2. 导入路由（一个 Url）
+
+**规则集设置 → 从订阅 Url 中导入规则**，可选地址只填下面这一条。
 
 ```text
-https://github.com/chushijack/universal-rules/releases/latest/download/v2ray-blacklist-routing.json
+https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN.json
 ```
 
-白名单路由：
-
-```text
-https://github.com/chushijack/universal-rules/releases/latest/download/v2ray-whitelist-routing.json
-```
-
-`domainStrategy` 使用 `AsIs`，避免在 fake-ip 下用假地址判断是不是国内。
+导入后与 FlClash 脚本是同一套分类和顺序（名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用）：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🎬 媒体、🔍 Google、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（规则备注为「🐟 漏网之鱼」，相当于脚本里的漏网之鱼，v2rayN 不能做成可选分组）。路由编辑里把 **域名解析策略** 设为 **AsIs**。
 
 ## 不要单独导入的文件
 
