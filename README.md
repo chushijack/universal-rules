@@ -65,45 +65,76 @@ https://github.com/chushijack/universal-rules/releases/latest/download/shadowroc
 
 ## v2rayN
 
-### 1. 更新 Geo（geosite.dat + geoip.dat）
+两种用法二选一：**方案 A** 与 FlClash 同一套名单（要换 Geo）；**方案 B** 只用 v2rayN 自带 dat，只导入一条分流 JSON。
+
+### 方案 A：与 FlClash 一致（自定义 Geo + `v2rayN.json`）
+
+#### 1. 更新 Geo（geosite.dat + geoip.dat）
 
 **不要**填在「添加规则 → 可选地址」里（那里只用于 `v2rayN.json`）。也**不要**填「路由规则集来源」——那是 sing-box 的 `.srs`，和 Geo 无关。
 
-任选一种方式：
+**只改「Geo 文件来源」不会立刻生效。** 这里只是下载地址模板；必须再 **触发一次 Geo 更新**，或 **手动覆盖 `bin` 里的文件**（见下）。改完参数要点 **确定**。
 
-**方式 A（推荐，一条模板对应两个文件）**
-
-1. **设置 → 参数设置 → v2rayN 设置**
-2. **Geo 文件来源（可选）**：若下拉可选手动/自定义，填（注意中间的 `{0}`，程序更新时会分别换成 `geosite` 和 `geoip`）：
+Geo 模板（`{0}` 会被换成 `geosite` / `geoip`）：
 
 ```text
 https://github.com/chushijack/universal-rules/releases/latest/download/{0}.dat
 ```
 
-3. 回到主界面 **检查更新 → 更新 Geo 文件**（或右键菜单里的同类项）。
+**方式 A：走 v2rayN 自动下载**
 
-等价于下面两个地址，不必分开填两次：
+1. **设置 → 参数设置 → v2rayN 设置 → Geo 文件来源（可选）** 填上面模板 → **确定**。
+2. **帮助 → 检查更新**，在更新项里 **勾选 GeoFiles**（或 Geo 相关项），点 **检查更新**。  
+   官方说明：这一步 **会走当前代理** 去拉 GitHub；节点不可用或 GitHub 异常时，**界面无报错也可能没下成功**，`bin` 里仍是旧 Loyalsoldier 的 dat。
+3. 打开 **`D:\software\v2rayN-windows-64\bin`**（便携版）或 **设置 → 打开存储所在的位置 → `bin`**，看 `geosite.dat` 修改时间与大小（约 **7～8 MB**）。仍是几 MB 以下旧体积 → 当方式 A 失败，改用方式 B。
+4. 建议勾选 **更新 Core 时忽略 Geo 文件**，避免以后升级 Xray 核又把 `bin` 里的 dat 盖回默认。
+
+**方式 B：手动覆盖（社区最常用，推荐）**
+
+浏览器分别下载（或从本仓库 `output/geo/` 复制）：
 
 ```text
 https://github.com/chushijack/universal-rules/releases/latest/download/geosite.dat
 https://github.com/chushijack/universal-rules/releases/latest/download/geoip.dat
 ```
 
-**方式 B（界面里没有自定义 Geo 来源时）**
+**完全退出 v2rayN** 后，覆盖 **`bin\geosite.dat`** 与 **`bin\geoip.dat`**（便携安装目录一般是 `v2rayN-windows-64\bin`）。再启动。
 
-浏览器分别下载上面两个文件，覆盖到 v2rayN 的 **bin** 目录（**设置 → 打开存储所在的位置**，再进 `bin`，替换同名 `geosite.dat`、`geoip.dat`）。
+必须用 **本仓库 Release** 的 dat，规则里的 `geosite:reject`、`geosite:cn` 等才和 `v2rayN.json` 一致。Loyalsoldier 默认 dat **没有** 这些分类名，会继续报 `failed to check code REJECT … EOF`。
 
-必须用 **本仓库 Release** 的 dat，规则里的 `geosite:cn`、`geosite:google` 等分类名才和名单一致；不要用 Loyalsoldier 默认 Geo，否则和 `v2rayN.json` 对不上。更新后 `geosite.dat` 体积应在 **数 MB** 量级；若只有几 KB，多半是下载失败（HTML 错误页），需重新更新。
+#### 2. 导入路由
 
-### 2. 导入路由（一个 Url）
-
-**规则集设置 → 从订阅 Url 中导入规则**，可选地址只填下面这一条。
+**规则集设置 → 从订阅 Url 中导入规则**，可选地址：
 
 ```text
 https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN.json
 ```
 
-导入后与 FlClash 脚本是同一套分类和顺序（名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用）：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🎬 媒体、🔍 Google、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（规则备注为「🐟 漏网之鱼」，相当于脚本里的漏网之鱼，v2rayN 不能做成可选分组）。路由编辑里把 **域名解析策略** 设为 **AsIs**。
+导入后与 FlClash 脚本是同一套分类和顺序（名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用）：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🎬 媒体、🔍 Google、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（规则备注为「🐟 漏网之鱼」）。路由编辑里把 **域名解析策略** 设为 **AsIs**。
+
+### 方案 B：内置 Geo，只导入分流 JSON（省事）
+
+**不用改 Geo 文件来源**，也**不用**覆盖 `bin` 里的 `geosite.dat` / `geoip.dat`。保持 v2rayN 默认（或 **帮助 → 检查更新 → GeoFiles** 更新的 Loyalsoldier 即可）。
+
+**规则集设置 → 从订阅 Url 中导入规则**，只填：
+
+```text
+https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-builtin-geo.json
+```
+
+路由顺序与 FlClash **分组意图** 对齐，但名单来自社区 Geo，**不会**与 `flclash.js` 逐条一致，例如：
+
+| 分组 | 内置 Geo 引用 |
+| --- | --- |
+| 局域网 | `geosite:private` + `geoip:private` |
+| 广告 | `geosite:category-ads-all` |
+| 国内 | `geosite:cn` + `geoip:cn` |
+| AI | `geosite:category-ai-!cn` |
+| 媒体 | `youtube` / `netflix` / `spotify` 等 |
+| Google | `geosite:google` |
+| 漏网之鱼 | 未命中 → `proxy`（无 `geosite:proxy` 大名单） |
+
+域名解析策略同样建议 **AsIs**。若要与 FlClash、Play 相关域名处理完全一致，用 **方案 A**。
 
 ## 不要单独导入的文件
 
