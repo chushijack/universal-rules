@@ -19,7 +19,7 @@
 
 两套规则的分类顺序相同。黑名单里，没有命中的流量走代理。白名单里，没有命中的流量直连。
 
-分类顺序是：局域网 → 广告 → 国内 → AI → 流媒体 → Google → 其他需要代理的网站。没有命中的流量进「🐟 漏网之鱼」。
+分类顺序是：局域网 → 广告 → 国内 → AI → 流媒体 → Google → 币安国际 → 其他需要代理的网站。没有命中的流量进「🐟 漏网之鱼」。
 
 各客户端在国内直连之前拦截主机名含 `stun` 的探测，以及端口 3478、3479、5349、19302–19309。这些包经常只有 IP，若先命中国内 IP 直连，就会从真实网卡出去。不拦截全部 UDP。系统代理拦不住 WebRTC；电脑要开 Tun，手机要让 FlClash 的 VPN 处于连接状态，并关闭 IPv6。
 
@@ -33,7 +33,7 @@
 https://github.com/chushijack/universal-rules/releases/latest/download/flclash.js
 ```
 
-应用后，你的节点分组后面会出现「🚫 广告」「🤖 AI」「🎬 媒体」「🔍 Google」「🚀 代理」「🐟 漏网之鱼」。广告分组默认是拦截。漏网之鱼接收没有命中的流量，默认仍是订阅里原来的最终去向，可以再改。国外域名的 DNS 交给「🚀 代理」解析，国内和局域网用国内 DoH 解析真实地址。
+应用后，你的节点分组后面会出现「🚫 广告」「🤖 AI」「🎬 媒体」「🔍 Google」「🟡 币安国际」「🚀 代理」「🐟 漏网之鱼」。广告分组默认是拦截。币安国际只包含币安国际版的 `binance.com`、`binance.vision` 及其子域名，不含 `binance.us`。漏网之鱼接收没有命中的流量，默认仍是订阅里原来的最终去向，可以再改。国外域名的 DNS 交给「🚀 代理」解析，国内和局域网用国内 DoH 解析真实地址。
 
 系统代理拦不住 DNS，浏览器仍会问运营商。请打开「虚拟网卡」。工具里关掉「追加系统 DNS」；如果开了「覆写 DNS」，客户端会换成自己的 DNS，脚本里的设置不会生效。
 
@@ -47,7 +47,7 @@ https://github.com/chushijack/universal-rules/releases/latest/download/flclash.j
 https://github.com/chushijack/universal-rules/releases/latest/download/clash-verge.js
 ```
 
-保存后，订阅原有分组后面会出现「🚫 广告」「🤖 AI」「🎬 媒体」「🔍 Google」「🚀 代理」「🐟 漏网之鱼」。广告分组默认是拦截。漏网之鱼接收没有命中的流量。系统代理拦不住 DNS，请在 Clash Verge 里打开虚拟网卡。
+保存后，订阅原有分组后面会出现「🚫 广告」「🤖 AI」「🎬 媒体」「🔍 Google」「🟡 币安国际」「🚀 代理」「🐟 漏网之鱼」。广告分组默认是拦截。币安国际只包含币安国际版的 `binance.com`、`binance.vision` 及其子域名，不含 `binance.us`。漏网之鱼接收没有命中的流量。系统代理拦不住 DNS，请在 Clash Verge 里打开虚拟网卡。
 
 ## 小火箭 Shadowrocket
 
@@ -113,7 +113,7 @@ https://github.com/chushijack/universal-rules/releases/latest/download/geoip.dat
 https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN.json
 ```
 
-导入后分类与顺序同本文「黑名单和白名单」：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🎬 媒体、🔍 Google、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（「🐟 漏网之鱼」）。名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用。路由编辑里把 **域名解析策略** 设为 **AsIs**。
+导入后分类与顺序同本文「黑名单和白名单」：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🎬 媒体、🔍 Google、🟡 币安国际、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（「🐟 漏网之鱼」）。名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用。币安国际是 `geosite:binance`。路由编辑里把 **域名解析策略** 设为 **AsIs**。
 
 ### 方案 B：内置 Geo，只导入分流 JSON（省事）
 
@@ -135,6 +135,7 @@ https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-bu
 | AI | `geosite:category-ai-!cn` |
 | 媒体 | `youtube` / `netflix` / `spotify` 等 |
 | Google | `geosite:google` |
+| 币安国际 | `domain:binance.com`、`domain:binance.vision`（不用社区 `geosite:binance`，那份含 `binance.us`） |
 | 漏网之鱼 | 未命中 → `proxy`（无 `geosite:proxy` 大名单） |
 
 域名解析策略同样建议 **AsIs**。需要与本仓库 Geo 完全同一套名单时，用 **方案 A**。
@@ -196,6 +197,7 @@ https://github.com/chushijack/universal-rules/releases/latest/download/simple_dn
 | 国内域名和 IP、广告、其他代理域名 | [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules) | GPL-3.0 | `direct.txt`、`cncidr.txt`、`reject.txt`、`proxy.txt` |
 | 国内域名补充 | [felixonmars/dnsmasq-china-list](https://github.com/felixonmars/dnsmasq-china-list) | WTFPL | `accelerated-domains.china.conf` |
 | AI、流媒体、Google | [ACL4SSR/ACL4SSR](https://github.com/ACL4SSR/ACL4SSR) | CC-BY-SA-4.0 | `AI.list`、`OpenAi.list`、`Claude.list`、`Gemini.list`、`Netflix.list`、`YouTube.list`、`DisneyPlus.list`、`Spotify.list`、`HBO.list`、`AbemaTV.list`、`Google.list` |
+| 币安国际 | 币安公开 API 文档 | 以文档所述域名为准 | `binance.com`、`binance.vision` 及其子域名 |
 | 局域网和保留地址 | IANA / RFC 1918、3927、4193、4291、6598、6761、6762、8375 | 公开的地址分配事实 | 本仓库内置的私有地址表 |
 | 分组图标 | [Koolson/Qure](https://github.com/Koolson/Qure) | 以该仓库说明为准 | `IconSet/Color/` 中的 ChatGPT、YouTube、Proxy、Advertising |
 
