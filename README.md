@@ -23,6 +23,24 @@
 
 各客户端在国内直连之前拦截主机名含 `stun` 的探测，以及端口 3478、3479、5349、19302–19309。这些包经常只有 IP，若先命中国内 IP 直连，就会从真实网卡出去。不拦截全部 UDP。系统代理拦不住 WebRTC；电脑要开 Tun，手机要让 FlClash 的 VPN 处于连接状态，并关闭 IPv6。
 
+## 策略组
+
+先命中的规则生效。下面按这个顺序说明每一类流量去哪。
+
+FlClash 和 Clash Verge 里，标成「可选节点」的分组会出现在你的订阅分组后面，节点自己选。局域网和国内只直连，不单独做可选分组。小火箭和 v2rayN 没有这些选择器：直连是 `DIRECT` / `direct`，拦截是 `REJECT` / `block`，需要代理的都进当前选中的节点（`PROXY` / `proxy`）。
+
+| 分组 | 接到什么 | 默认去向 |
+| --- | --- | --- |
+| 局域网 | 本机、局域网和保留地址，例如 `localhost`、`192.168.0.0/16` | 直连 |
+| 🚫 广告 | 广告和追踪域名 | 拦截。分组里可以改成节点 |
+| 国内 | 国内网站域名，以及中国大陆 IP | 直连 |
+| 🤖 AI | ChatGPT、Claude、Gemini 等 AI 服务 | 可选节点 |
+| 🎬 媒体 | YouTube、Netflix、Disney+、Spotify 等流媒体。YouTube 在这里，不进 Google | 可选节点 |
+| 🔍 Google | Google 搜索、地图、Play 等 Google 服务，不含 YouTube | 可选节点 |
+| 🟡 币安国际 | 币安国际版的 `binance.com`、`binance.vision` 及其子域名，包括网页、`api`、`stream`。不含 `binance.us` | 可选节点 |
+| 🚀 代理 | 一份点名的国外网站名单，例如 GitHub、Telegram。名单里没有的域名不会因为「前面没命中」就进这里 | 可选节点。国外域名的 DNS 也走这个分组里选中的节点 |
+| 🐟 漏网之鱼 | 上面都没有命中的流量 | 黑名单默认代理，白名单默认直连。这个分组可以再改 |
+
 ## FlClash
 
 1. 「配置」里继续用你自己的机场订阅。
@@ -30,10 +48,10 @@
 3. 打开下面的地址，全选复制到新建脚本里，保存后选中，再应用。脚本框不能直接填链接。
 
 ```text
-https://github.com/chushijack/universal-rules/releases/latest/download/flclash.js
+https://github.com/chushijack/universal-rules/releases/latest/download/FlClash.js
 ```
 
-应用后，你的节点分组后面会出现「🚫 广告」「🤖 AI」「🎬 媒体」「🔍 Google」「🟡 币安国际」「🚀 代理」「🐟 漏网之鱼」。广告分组默认是拦截。币安国际只包含币安国际版的 `binance.com`、`binance.vision` 及其子域名，不含 `binance.us`。漏网之鱼接收没有命中的流量，默认仍是订阅里原来的最终去向，可以再改。国外域名的 DNS 交给「🚀 代理」解析，国内和局域网用国内 DoH 解析真实地址。
+应用后，订阅原有分组后面会出现「策略组」里那些可选分组。国外域名的 DNS 交给「🚀 代理」解析，国内和局域网用国内 DoH 解析真实地址。漏网之鱼默认仍是订阅里原来的最终去向，可以再改。
 
 系统代理拦不住 DNS，浏览器仍会问运营商。请打开「虚拟网卡」。工具里关掉「追加系统 DNS」；如果开了「覆写 DNS」，客户端会换成自己的 DNS，脚本里的设置不会生效。
 
@@ -44,10 +62,10 @@ https://github.com/chushijack/universal-rules/releases/latest/download/flclash.j
 3. 打开下面的地址，全选复制进去并保存，再重新激活订阅。脚本框不能直接填链接。
 
 ```text
-https://github.com/chushijack/universal-rules/releases/latest/download/clash-verge.js
+https://github.com/chushijack/universal-rules/releases/latest/download/ClashVergeRev.js
 ```
 
-保存后，订阅原有分组后面会出现「🚫 广告」「🤖 AI」「🎬 媒体」「🔍 Google」「🟡 币安国际」「🚀 代理」「🐟 漏网之鱼」。广告分组默认是拦截。币安国际只包含币安国际版的 `binance.com`、`binance.vision` 及其子域名，不含 `binance.us`。漏网之鱼接收没有命中的流量。系统代理拦不住 DNS，请在 Clash Verge 里打开虚拟网卡。
+保存后，订阅原有分组后面会出现「策略组」里那些可选分组。漏网之鱼接收没有命中的流量。系统代理拦不住 DNS，请在 Clash Verge 里打开虚拟网卡。
 
 ## 小火箭 Shadowrocket
 
@@ -56,13 +74,13 @@ https://github.com/chushijack/universal-rules/releases/latest/download/clash-ver
 黑名单：
 
 ```text
-https://github.com/chushijack/universal-rules/releases/latest/download/shadowrocket-blacklist.conf
+https://github.com/chushijack/universal-rules/releases/latest/download/Shadowrocket-blacklist.conf
 ```
 
 白名单：
 
 ```text
-https://github.com/chushijack/universal-rules/releases/latest/download/shadowrocket-whitelist.conf
+https://github.com/chushijack/universal-rules/releases/latest/download/Shadowrocket-whitelist.conf
 ```
 
 ## v2rayN
@@ -146,10 +164,10 @@ https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-bu
 
 **1. 简易 DNS**
 
-Release 提供 **`simple_dns.json`**（v2rayN `SimpleDNSItem` 格式）。在 **设置 → Core 基础设置 → DNS → DNS 基础设置** 中按文件填写，或下载后对照：
+Release 提供 **`v2rayN-simple-dns.json`**（v2rayN `SimpleDNSItem` 格式）。在 **设置 → Core 基础设置 → DNS → DNS 基础设置** 中按文件填写，或下载后对照：
 
 ```text
-https://github.com/chushijack/universal-rules/releases/latest/download/simple_dns.json
+https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-simple-dns.json
 ```
 
 | 项 | 建议值 |
@@ -175,13 +193,13 @@ https://github.com/chushijack/universal-rules/releases/latest/download/simple_dn
 
 ## 不要单独导入的文件
 
-`clash-blacklist.yaml` 和 `clash-whitelist.yaml` 是带占位节点的完整配置。导入后会换掉你订阅里的节点。已有订阅时用上面的脚本，不要用这两份。
+`Clash-blacklist.yaml` 和 `Clash-whitelist.yaml` 是带占位节点的完整配置。导入后会换掉你订阅里的节点。已有订阅时用上面的脚本，不要用这两份。
 
 `*.yaml` 和 `*.list` 是规则名单，由上面的配置自动下载，不用逐个导入。
 
 ## sing-box
 
-从最新 Release 下载 `singbox.zip`，解压后配置里的 `path` 指向同目录的 JSON。
+从最新 Release 下载 `sing-box.zip`，解压后配置里的 `path` 指向同目录的 JSON。
 
 ## 上游数据出处
 
