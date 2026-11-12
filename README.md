@@ -132,7 +132,9 @@ https://github.com/chushijack/universal-rules/releases/latest/download/geoip.dat
 https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN.json
 ```
 
-导入后分类与顺序同本文「黑名单和白名单」：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🌐 社交、🎬 媒体、🔍 Google、🟡 币安国际、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（「🐟 漏网之鱼」）。名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用。币安国际是 `geosite:binance`。路由编辑里把 **域名解析策略** 设为 **AsIs**。
+导入后分类与顺序同本文「黑名单和白名单」：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🌐 社交、🎬 媒体、🔍 Google、🟡 币安国际、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（「🐟 漏网之鱼」）。名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用。
+
+**方案 A（域名 + IP 同行）**：凡分类同时有域名名单与 `ipcidr`（🏠 局域网、`cn`、🌐 社交、🎬 媒体），`v2rayN.json` 里各用 **一条规则** 写 `geosite:<id>` 与 `geoip:<id>`；网段已打进本仓库 `geoip.dat`，**不必**把手里的 `*.ipcidr.yaml` 抄进 JSON。仅域名的分组（🤖 AI、🔍 Google 等）仍只写 `geosite:`。币安国际是 `geosite:binance`。路由编辑里把 **域名解析策略** 设为 **AsIs**。
 
 ### 方案 B：内置 Geo，只导入分流 JSON（省事）
 
@@ -152,8 +154,8 @@ https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-bu
 | 广告 | `geosite:category-ads-all` |
 | 国内 | `geosite:cn` + `geoip:cn` |
 | AI | `geosite:category-ai-!cn` |
-| 社交 | `twitter` / `facebook` / `telegram` / `tiktok` 等（`v2rayN-builtin-geo.json` 内 `🌐 社交` 一行） |
-| 媒体 | `youtube` / `netflix` / `spotify` 等 |
+| 社交 | 「🌐 社交」**一行**：内置 `geosite:twitter` 等 **+** `geoip:facebook` / `geoip:telegram` / `geoip:twitter` **+** 与 `social.ipcidr.yaml` 同源的裸 CIDR |
+| 媒体 | 「🎬 媒体」**一行**：`geosite:youtube` / `netflix` 等 **+** `geoip:netflix` **+** 与 `media.ipcidr.yaml` 同源的裸 CIDR |
 | Google | `geosite:google` |
 | 币安国际 | `domain:binance.com`、`domain:binance.vision`（不用社区 `geosite:binance`，那份含 `binance.us`） |
 | 漏网之鱼 | 未命中 → `proxy`（无 `geosite:proxy` 大名单） |
@@ -180,7 +182,9 @@ Facebook、WhatsApp、LINE 等 App 会 **先连 IP**（例如 Meta `31.13.x`）�
 
 `geoip:social` 收录 Telegram、WhatsApp/Meta、LINE 等 **IP-CIDR**（Release 附件 `social.ipcidr.yaml` 与此一致）。仍只列 `geosite:tiktok` 等而不带 `ip` 时，裸 IP 照样会漏。
 
-- **方案 B**：内置 Loyalsoldier dat **没有** `geoip:social`。若坚持用多个 `geosite:twitter` 等，需要 **另加一条** `ip` 规则：从 Release 下载 `social.ipcidr.yaml` 里的网段，转成 v2rayN 的 `ip` 数组，`outboundTag` 仍指向 `residential-us`，并排在最前。
+- **方案 B**：导入的 `v2rayN-builtin-geo.json` 已在「🌐 社交」**同一条规则**里带上内置 `geosite:*` 与 `geoip:facebook` 等及项目社交 CIDR。住宅出口时把该条复制到更靠前，或整段改 `outboundTag` 为 `residential-us` 即可，**不必**再下载 `social.ipcidr.yaml` 手转 IP。名单里部分网段来自云厂商，可能误匹配非社交流量，养号请自测。
+
+- **共享云 CIDR**：社交 IP 含 AWS 等大范围段（与 ACL4SSR 一致），按 IP 命中时偶发会带上非社交流量；不要为求「干净」擅自删网段，删了反而会回到裸 IP 漏网。
 
 **FlClash / Clash Verge**：在扩展脚本生成的 **「🌐 社交」** 分组里直接选你的住宅节点即可；域名与 `social-ipcidr` 命中的流量都会进该分组（请用含社交 IP 网段的 Release，勿用旧版只有 Telegram IP 的包）。
 
