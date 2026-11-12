@@ -160,6 +160,32 @@ https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-bu
 
 域名解析策略同样建议 **AsIs**。需要与本仓库 Geo 完全同一套名单时，用 **方案 A**。
 
+### 住宅 IP / 对 IP 质量敏感的平台（TikTok、Facebook 等）
+
+Facebook、WhatsApp、LINE 等 App 会 **先连 IP**（例如 Meta `31.13.x`）。路由里只写 `geosite:facebook`、`geosite:tiktok` **匹配不到这些连接**，会继续往下命中本仓库的「🌐 社交」或「🐟 漏网之鱼」，出口就可能变成机场节点而不是你的住宅线路。
+
+**v2rayN：自定义规则必须放在导入的 `v2rayN.json` 之前，且同一行规则里同时写域名与 IP。**
+
+- **方案 A（推荐）**：已换本仓库 `geosite.dat` / `geoip.dat` 时，用一条规则覆盖整个社交分类（与 Clash 的 `social.*` 一致），不要只列几个 `geosite:`：
+
+```json
+{
+  "outboundTag": "residential-us",
+  "domain": ["geosite:social"],
+  "ip": ["geoip:social"],
+  "enabled": true,
+  "remarks": "🏠 住宅 IP（社交域名 + Meta/Telegram 等网段）"
+}
+```
+
+`geoip:social` 收录 Telegram、WhatsApp/Meta、LINE 等 **IP-CIDR**（Release 附件 `social.ipcidr.yaml` 与此一致）。仍只列 `geosite:tiktok` 等而不带 `ip` 时，裸 IP 照样会漏。
+
+- **方案 B**：内置 Loyalsoldier dat **没有** `geoip:social`。若坚持用多个 `geosite:twitter` 等，需要 **另加一条** `ip` 规则：从 Release 下载 `social.ipcidr.yaml` 里的网段，转成 v2rayN 的 `ip` 数组，`outboundTag` 仍指向 `residential-us`，并排在最前。
+
+**FlClash / Clash Verge**：在扩展脚本生成的 **「🌐 社交」** 分组里直接选你的住宅节点即可；域名与 `social-ipcidr` 命中的流量都会进该分组（请用含社交 IP 网段的 Release，勿用旧版只有 Telegram IP 的包）。
+
+**说明**：TikTok、Discord 等在上游名单里 **几乎没有专用 IP 段**，住宅出口主要仍靠 **域名 / Sniffer**；若某 App 在「最近请求」里长期裸 IP 且未命中住宅，需要再单独补 IP 或换方案 A 的 `geosite:social` 缩小漏口。
+
 ### DNS 与防泄露（建议）
 
 路由 JSON（`v2rayN.json` / `v2rayN-builtin-geo.json`）**已自带** 前置规则：「🌐 绕过中国公共 DNS IP / 域名」（连 Ali、DoH.pub **走直连**）、「🚫 阻断 UDP 443」（减少 QUIC 绕过域名分流）。顺序在局域网/国内/漏网之鱼 **之前**，避免 DoH 被漏网送进代理。再按下面配 DNS。
