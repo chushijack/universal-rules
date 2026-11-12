@@ -19,7 +19,7 @@
 
 两套规则的分类顺序相同。黑名单里，没有命中的流量走代理。白名单里，没有命中的流量直连。
 
-分类顺序是：局域网 → 广告 → 国内 → AI → 流媒体 → Google → 币安国际 → 其他需要代理的网站。没有命中的流量进「🐟 漏网之鱼」。
+分类顺序是：局域网 → 广告 → 国内 → AI → 社交 → 流媒体 → Google → 币安国际 → 其他需要代理的网站。没有命中的流量进「🐟 漏网之鱼」。
 
 各客户端在国内直连之前拦截主机名含 `stun` 的探测，以及端口 3478、3479、5349、19302–19309。这些包经常只有 IP，若先命中国内 IP 直连，就会从真实网卡出去。不拦截全部 UDP。系统代理拦不住 WebRTC；电脑要开 Tun，手机要让 FlClash 的 VPN 处于连接状态，并关闭 IPv6。
 
@@ -35,10 +35,11 @@ FlClash 和 Clash Verge 里，标成「可选节点」的分组会出现在你�
 | 🚫 广告 | 广告和追踪域名 | 拦截。分组里可以改成节点 |
 | 国内 | 国内网站域名，以及中国大陆 IP | 直连 |
 | 🤖 AI | ChatGPT、Claude、Gemini 等 AI 服务 | 可选节点 |
+| 🌐 社交 | X、Facebook、Instagram、TikTok、Reddit、Discord、Telegram、WhatsApp 等海外社交与即时通讯。短视频在社交平台内（如 TikTok、Reels）走本组，不走媒体 | 可选节点 |
 | 🎬 媒体 | YouTube、Netflix、Disney+、Spotify 等流媒体。YouTube 在这里，不进 Google | 可选节点 |
 | 🔍 Google | Google 搜索、地图、Play 等 Google 服务，不含 YouTube | 可选节点 |
 | 🟡 币安国际 | 币安国际版的 `binance.com`、`binance.vision` 及其子域名，包括网页、`api`、`stream`。不含 `binance.us` | 可选节点 |
-| 🚀 代理 | 一份点名的国外网站名单，例如 GitHub、Telegram。名单里没有的域名不会因为「前面没命中」就进这里 | 可选节点。国外域名的 DNS 也走这个分组里选中的节点 |
+| 🚀 代理 | 一份点名的国外网站名单，例如 GitHub。Telegram 等已在「🌐 社交」。名单里没有的域名不会因为「前面没命中」就进这里 | 可选节点。国外域名的 DNS 也走这个分组里选中的节点 |
 | 🐟 漏网之鱼 | 上面都没有命中的流量 | 黑名单默认代理，白名单默认直连。这个分组可以再改 |
 
 ## FlClash
@@ -131,7 +132,7 @@ https://github.com/chushijack/universal-rules/releases/latest/download/geoip.dat
 https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN.json
 ```
 
-导入后分类与顺序同本文「黑名单和白名单」：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🎬 媒体、🔍 Google、🟡 币安国际、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（「🐟 漏网之鱼」）。名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用。币安国际是 `geosite:binance`。路由编辑里把 **域名解析策略** 设为 **AsIs**。
+导入后分类与顺序同本文「黑名单和白名单」：局域网 → 🚫 广告（`block`）→ 国内（`direct`）→ 🤖 AI、🌐 社交、🎬 媒体、🔍 Google、🟡 币安国际、🚀 代理（`proxy`，当前选中节点）→ 未命中走 `proxy`（「🐟 漏网之鱼」）。名单在 Geo 的 dat 里，路由只写 `geosite:` / `geoip:` 引用。币安国际是 `geosite:binance`。路由编辑里把 **域名解析策略** 设为 **AsIs**。
 
 ### 方案 B：内置 Geo，只导入分流 JSON（省事）
 
@@ -151,6 +152,7 @@ https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-bu
 | 广告 | `geosite:category-ads-all` |
 | 国内 | `geosite:cn` + `geoip:cn` |
 | AI | `geosite:category-ai-!cn` |
+| 社交 | `twitter` / `facebook` / `telegram` / `tiktok` 等（`v2rayN-builtin-geo.json` 内 `🌐 社交` 一行） |
 | 媒体 | `youtube` / `netflix` / `spotify` 等 |
 | Google | `geosite:google` |
 | 币安国际 | `domain:binance.com`、`domain:binance.vision`（不用社区 `geosite:binance`，那份含 `binance.us`） |
@@ -214,7 +216,8 @@ https://github.com/chushijack/universal-rules/releases/latest/download/v2rayN-si
 | --- | --- | --- | --- |
 | 国内域名和 IP、广告、其他代理域名 | [Loyalsoldier/clash-rules](https://github.com/Loyalsoldier/clash-rules) | GPL-3.0 | `direct.txt`、`cncidr.txt`、`reject.txt`、`proxy.txt` |
 | 国内域名补充 | [felixonmars/dnsmasq-china-list](https://github.com/felixonmars/dnsmasq-china-list) | WTFPL | `accelerated-domains.china.conf` |
-| AI、流媒体、Google | [ACL4SSR/ACL4SSR](https://github.com/ACL4SSR/ACL4SSR) | CC-BY-SA-4.0 | `AI.list`、`OpenAi.list`、`Claude.list`、`Gemini.list`、`Netflix.list`、`YouTube.list`、`DisneyPlus.list`、`Spotify.list`、`HBO.list`、`AbemaTV.list`、`Google.list` |
+| AI、社交、流媒体、Google | [ACL4SSR/ACL4SSR](https://github.com/ACL4SSR/ACL4SSR) | CC-BY-SA-4.0 | `AI.list`、`OpenAi.list`、`Claude.list`、`Gemini.list`、`Discord.list`、`Facebook.list`、`Instagram.list`、`Telegram.list`、`TikTok.list`、`Twitter.list`、`Whatsapp.list`、`Netflix.list`、`YouTube.list`、`DisneyPlus.list`、`Spotify.list`、`HBO.list`、`AbemaTV.list`、`Google.list` 等 |
+| 社交补充 | [v2fly/domain-list-community](https://github.com/v2fly/domain-list-community) | MIT | 见 `sources/v2fly-domain-list-community/source.yaml` |
 | 币安国际 | 币安公开 API 文档 | 以文档所述域名为准 | `binance.com`、`binance.vision` 及其子域名 |
 | 局域网和保留地址 | IANA / RFC 1918、3927、4193、4291、6598、6761、6762、8375 | 公开的地址分配事实 | 本仓库内置的私有地址表 |
 | 分组图标 | [Koolson/Qure](https://github.com/Koolson/Qure) | 以该仓库说明为准 | `IconSet/Color/` 中的 ChatGPT、YouTube、Proxy、Advertising |
